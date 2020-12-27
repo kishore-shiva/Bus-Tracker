@@ -143,7 +143,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primaryColor: Color(0xff1d005e)),
+      theme: ThemeData(primaryColor: Colors.black),
       home: MyHomePage(),
     );
   }
@@ -159,21 +159,25 @@ class _MyHomePageState extends State<MyHomePage> {
   GoogleMapController _controller;
   Location _location = Location();
   BitmapDescriptor customIcon;
+  Set<Circle> mycircles = Set.from([
+    Circle(
+      circleId: CircleId('1'),
+      center: LatLng(0, 0),
+      radius: 4000,
+    )
+  ]);
 
   void _onMapCreated(GoogleMapController _cntlr) {
     _controller = _cntlr;
+    Location location = new Location();
+    print('The location is: ');
+    print(location.getLocation());
     _location.onLocationChanged().listen((l) {
       _controller.animateCamera(
         CameraUpdate.newCameraPosition(
-          CameraPosition(target: LatLng(l.latitude, l.longitude), zoom: 15),
+          CameraPosition(target: LatLng(l.latitude, l.longitude), zoom: 16),
         ),
       );
-      BitmapDescriptor.fromAssetImage(
-              ImageConfiguration(size: Size(12, 12)), 'assets/bus_marker.png')
-          .then((d) {
-        customIcon = d;
-      });
-      _add(l.latitude, l.longitude, customIcon);
     });
   }
 
@@ -196,6 +200,23 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void getCurrentLocation() async {
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(12, 12)), 'assets/bus_marker.png')
+        .then((d) {
+      customIcon = d;
+    });
+    _location.onLocationChanged().listen((event) {
+      _add(event.latitude, event.longitude, customIcon);
+    });
+  }
+
+  @override
+  void initState() {
+    getCurrentLocation();
+    _onMapCreated(_controller);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -206,11 +227,13 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Stack(
           children: [
             GoogleMap(
+              myLocationButtonEnabled: true,
               initialCameraPosition:
                   CameraPosition(target: _initialcameraposition),
               mapType: MapType.normal,
               onMapCreated: _onMapCreated,
               myLocationEnabled: true,
+              onCameraMove: null,
               markers: Set<Marker>.of(markers.values),
             ),
           ],
