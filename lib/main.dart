@@ -159,6 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
   GoogleMapController _controller;
   Location _location = Location();
   BitmapDescriptor customIcon;
+
   Set<Circle> mycircles = Set.from([
     Circle(
       circleId: CircleId('1'),
@@ -224,18 +225,129 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-        child: Stack(
+        child: Column(
           children: [
-            GoogleMap(
-              myLocationButtonEnabled: true,
-              initialCameraPosition:
-                  CameraPosition(target: _initialcameraposition),
-              mapType: MapType.normal,
-              onMapCreated: _onMapCreated,
-              myLocationEnabled: true,
-              onCameraMove: null,
-              markers: Set<Marker>.of(markers.values),
+            Container(
+              height: 0.8 * MediaQuery.of(context).size.height - 80,
+              width: MediaQuery.of(context).size.width,
+              child: GoogleMap(
+                myLocationButtonEnabled: true,
+                initialCameraPosition:
+                    CameraPosition(target: _initialcameraposition),
+                mapType: MapType.normal,
+                onMapCreated: _onMapCreated,
+                myLocationEnabled: true,
+                onCameraMove: null,
+                markers: Set<Marker>.of(markers.values),
+              ),
             ),
+            Container(
+              height: 0.2 * MediaQuery.of(context).size.height - 12,
+              width: MediaQuery.of(context).size.width,
+              color: Colors.black,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          child: Text(
+                            "Stop1",
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ),
+                        Container(
+                          height: 15,
+                          width: 15,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                    height: 4,
+                    width: 50,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.rectangle, color: Colors.white),
+                  ),
+                  Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          child: Text(
+                            "Stop1",
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ),
+                        Container(
+                          height: 15,
+                          width: 15,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                    height: 4,
+                    width: 50,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.rectangle, color: Colors.white),
+                  ),
+                  Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          child: Text(
+                            "Stop1",
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ),
+                        Container(
+                          height: 15,
+                          width: 15,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                    height: 4,
+                    width: 50,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.rectangle, color: Colors.white),
+                  ),
+                  Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          child: Text(
+                            "Stop1",
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ),
+                        Container(
+                          height: 15,
+                          width: 15,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            )
           ],
         ),
       ),
