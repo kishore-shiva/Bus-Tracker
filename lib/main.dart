@@ -1,138 +1,13 @@
-/**import 'dart:async';
-import 'dart:typed_data';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
+import 'dart:ui';
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Maps',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Map Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  StreamSubscription _locationSubscription;
-  Location _locationTracker = Location();
-  Marker marker;
-  Circle circle;
-  GoogleMapController _controller;
-
-  static final CameraPosition initialLocation = CameraPosition(
-    target: LatLng(13.086390, 80.256479),
-    zoom: 14.4746,
-  );
-
-  Future<Uint8List> getMarker() async {
-    ByteData byteData =
-        await DefaultAssetBundle.of(context).load("assets/bus_marker.png");
-    return byteData.buffer.asUint8List();
-  }
-
-  void updateMarkerAndCircle(LocationData newLocalData, Uint8List imageData) {
-    LatLng latlng = LatLng(newLocalData.latitude, newLocalData.longitude);
-    this.setState(() {
-      marker = Marker(
-          markerId: MarkerId("home"),
-          position: latlng,
-          rotation: newLocalData.heading,
-          draggable: false,
-          zIndex: 2,
-          flat: true,
-          anchor: Offset(0.5, 0.5),
-          icon: BitmapDescriptor.fromBytes(imageData));
-      circle = Circle(
-          circleId: CircleId("car"),
-          radius: 30,
-          zIndex: 1,
-          strokeColor: Colors.blue,
-          center: latlng,
-          fillColor: Colors.blue.withAlpha(70));
-    });
-  }
-
-  void getCurrentLocation() async {
-    try {
-      Uint8List imageData = await getMarker();
-      var location = await _locationTracker.getLocation();
-
-      updateMarkerAndCircle(location, imageData);
-
-      if (_locationSubscription != null) {
-        _locationSubscription.cancel();
-      }
-
-      _locationSubscription =
-          _locationTracker.onLocationChanged().listen((newLocalData) {
-        if (_controller != null) {
-          _controller.animateCamera(CameraUpdate.newCameraPosition(
-              new CameraPosition(
-                  bearing: 192.8334901395799,
-                  target: LatLng(newLocalData.latitude, newLocalData.longitude),
-                  tilt: 0,
-                  zoom: 17.20)));
-          updateMarkerAndCircle(newLocalData, imageData);
-        }
-      });
-    } on PlatformException catch (e) {
-      if (e.code == 'PERMISSION_DENIED') {
-        debugPrint("Permission Denied");
-      }
-    }
-  }
-
-  @override
-  void initState() {
-    getCurrentLocation();
-  }
-
-  void dispose() {
-    if (_locationSubscription != null) {
-      _locationSubscription.cancel();
-    }
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: GoogleMap(
-        mapType: MapType.hybrid,
-        initialCameraPosition: initialLocation,
-        markers: Set.of((marker != null) ? [marker] : []),
-        circles: Set.of((circle != null) ? [circle] : []),
-        onMapCreated: (GoogleMapController controller) {
-          _controller = controller;
-        },
-      ),
-    );
-  }
-}**/
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:wakelock/wakelock.dart';
 
 void main() {
   runApp(MyApp());
@@ -143,7 +18,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primaryColor: Colors.black),
+      theme:
+          ThemeData(primaryColor: Colors.black, highlightColor: Colors.orange),
       home: MyHomePage(),
     );
   }
@@ -159,6 +35,76 @@ class _MyHomePageState extends State<MyHomePage> {
   GoogleMapController _controller;
   Location _location = Location();
   BitmapDescriptor customIcon;
+  final ScrollController _scrollController = new ScrollController();
+  final scrollDirection = Axis.horizontal;
+  final route1 = [""];
+  Color notReached = Colors.red, Reached = Colors.green;
+
+  final Route1 = [
+    "Purasaiwakkam",
+    "Purasaiwakkam",
+    "Purasaiwakkam",
+    "Purasaiwakkam",
+    "Purasaiwakkam",
+    "Purasaiwakkam"
+  ];
+
+  /**List generateRoutesUI(var routes) {
+    var RowList = [];
+    for (int i = 0; i < routes.length; i++) {
+      if (i == routes.length - 1) {
+        RowList.add(Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                child: Text(
+                  routes[i],
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ),
+              Container(
+                height: 15,
+                width: 15,
+                decoration:
+                    BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+              ),
+            ],
+          ),
+        ));
+      } else {
+        RowList.add(
+          Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  child: Text(
+                    routes[i],
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
+                Container(
+                  height: 15,
+                  width: 15,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        );
+        RowList.add(Container(
+          margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+          height: 4,
+          width: 50,
+          decoration:
+              BoxDecoration(shape: BoxShape.rectangle, color: Colors.white),
+        ));
+      }
+    }
+    return RowList;
+  }*/
 
   Set<Circle> mycircles = Set.from([
     Circle(
@@ -174,6 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
     print('The location is: ');
     print(location.getLocation());
     _location.onLocationChanged().listen((l) {
+      getAddress(l.latitude, l.longitude);
       _controller.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(target: LatLng(l.latitude, l.longitude), zoom: 16),
@@ -183,6 +130,22 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+
+  void getAddress(double lat, double long) async {
+    final coordinates = new Coordinates(lat, long);
+    var addresses =
+        await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first;
+    print("${first.featureName} : ${first.addressLine}");
+    Fluttertoast.showToast(
+        msg:
+            "${first.featureName} : ${first.addressLine} : ${first.subLocality}",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
+  }
 
   void _add(double lat, double lng, BitmapDescriptor icon) {
     var markerIdVal = "assets/bus_marker.png";
@@ -216,6 +179,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     getCurrentLocation();
     _onMapCreated(_controller);
+    Wakelock.enable();
+  }
+
+  Future<String> scroller() async {
+    _scrollController.jumpTo(100);
+    Position position = await Geolocator.getCurrentPosition();
+    return position.toString();
   }
 
   @override
@@ -242,112 +212,194 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             Container(
-              height: 0.2 * MediaQuery.of(context).size.height - 12,
-              width: MediaQuery.of(context).size.width,
-              color: Colors.black,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          child: Text(
-                            "Stop1",
-                            style: TextStyle(color: Colors.white, fontSize: 12),
+                height: 0.2 * MediaQuery.of(context).size.height - 12,
+                width: MediaQuery.of(context).size.width,
+                color: Colors.black,
+                child: Container(
+                    margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                    child: Scrollbar(
+                      isAlwaysShown: true,
+                      controller: _scrollController,
+                      radius: Radius.circular(50),
+                      thickness: 10,
+                      child: Center(
+                        child: SingleChildScrollView(
+                          controller: _scrollController,
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      child: Text(
+                                        "Stop1",
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 15,
+                                      width: 15,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                                height: 4,
+                                width: 50,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.rectangle,
+                                    color: Colors.white),
+                              ),
+                              Container(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      child: Text(
+                                        "Stop1",
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 15,
+                                      width: 15,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                                height: 4,
+                                width: 50,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.rectangle,
+                                    color: Colors.white),
+                              ),
+                              Container(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      child: Text(
+                                        "Stop1",
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 15,
+                                      width: 15,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                                height: 4,
+                                width: 50,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.rectangle,
+                                    color: Colors.white),
+                              ),
+                              Container(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      child: Text(
+                                        "Stop1",
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 15,
+                                      width: 15,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                                height: 4,
+                                width: 50,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.rectangle,
+                                    color: Colors.white),
+                              ),
+                              Container(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      child: Text(
+                                        "Stop1",
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 15,
+                                      width: 15,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                                height: 4,
+                                width: 50,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.rectangle,
+                                    color: Colors.white),
+                              ),
+                              Container(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      child: Text(
+                                        "Stop1",
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 15,
+                                      width: 15,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Container(
-                          height: 15,
-                          width: 15,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                    height: 4,
-                    width: 50,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.rectangle, color: Colors.white),
-                  ),
-                  Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          child: Text(
-                            "Stop1",
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                        ),
-                        Container(
-                          height: 15,
-                          width: 15,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                    height: 4,
-                    width: 50,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.rectangle, color: Colors.white),
-                  ),
-                  Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          child: Text(
-                            "Stop1",
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                        ),
-                        Container(
-                          height: 15,
-                          width: 15,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                    height: 4,
-                    width: 50,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.rectangle, color: Colors.white),
-                  ),
-                  Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          child: Text(
-                            "Stop1",
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                        ),
-                        Container(
-                          height: 15,
-                          width: 15,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            )
+                      ),
+                    ))),
           ],
         ),
       ),
