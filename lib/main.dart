@@ -40,34 +40,39 @@ class _MyHomePageState extends State<MyHomePage> {
   final route1 = [""];
   Color notReached = Colors.red, Reached = Colors.green;
 
-  final Route1 = [
-    "Purasaiwakkam",
-    "Purasaiwakkam",
-    "Purasaiwakkam",
-    "Purasaiwakkam",
-    "Purasaiwakkam",
-    "Purasaiwakkam"
+  List Route1 = [
+    "Perumalpet",
+    "choolai",
+    "Anna nagar",
+    "Guindy",
+    "Adyar",
+    "OMR"
   ];
+  final colors = new List();
 
-  /**List generateRoutesUI(var routes) {
-    var RowList = [];
+  List<Widget> generateRoutesUI(var routes) {
+    List<Widget> RowList = [];
     for (int i = 0; i < routes.length; i++) {
       if (i == routes.length - 1) {
         RowList.add(Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 child: Text(
                   routes[i],
-                  style: TextStyle(color: Colors.white, fontSize: 12),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
               Container(
                 height: 15,
                 width: 15,
                 decoration:
-                    BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                    BoxDecoration(shape: BoxShape.circle, color: colors[i]),
               ),
             ],
           ),
@@ -77,34 +82,43 @@ class _MyHomePageState extends State<MyHomePage> {
           Container(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   child: Text(
                     routes[i],
-                    style: TextStyle(color: Colors.white, fontSize: 12),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
                 Container(
-                  height: 15,
-                  width: 15,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle, color: Colors.white),
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 15,
+                        width: 15,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle, color: colors[i]),
+                      ),
+                      Container(
+                        height: 4,
+                        width: 100,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.rectangle, color: colors[i]),
+                      )
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
         );
-        RowList.add(Container(
-          margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
-          height: 4,
-          width: 50,
-          decoration:
-              BoxDecoration(shape: BoxShape.rectangle, color: Colors.white),
-        ));
       }
     }
     return RowList;
-  }*/
+  }
 
   Set<Circle> mycircles = Set.from([
     Circle(
@@ -145,6 +159,26 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.red,
         textColor: Colors.white,
         fontSize: 16.0);
+    print("FN STARTED _______________________________");
+    print("${first.addressLine} : " + Route1[0]);
+    for (int i = 0; i < Route1.length; i++) {
+      if ("${first.addressLine}"
+          .contains(new RegExp(Route1[i], caseSensitive: false))) {
+        print("MATCHED ________________________");
+        print("${first.addressLine} : " + Route1[i]);
+        setState(() {
+          colors[i] = Reached;
+          Fluttertoast.showToast(
+              msg: "done correct but not changing",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.TOP,
+              backgroundColor: Colors.blue,
+              textColor: Colors.white,
+              fontSize: 16.0);
+        });
+        break;
+      }
+    }
   }
 
   void _add(double lat, double lng, BitmapDescriptor icon) {
@@ -180,6 +214,9 @@ class _MyHomePageState extends State<MyHomePage> {
     getCurrentLocation();
     _onMapCreated(_controller);
     Wakelock.enable();
+    for (int i = 0; i < Route1.length; i++) {
+      colors.add(notReached);
+    }
   }
 
   Future<String> scroller() async {
@@ -228,174 +265,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        "Stop1",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 12),
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 15,
-                                      width: 15,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                                height: 4,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: Colors.white),
-                              ),
-                              Container(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        "Stop1",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 12),
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 15,
-                                      width: 15,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                                height: 4,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: Colors.white),
-                              ),
-                              Container(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        "Stop1",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 12),
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 15,
-                                      width: 15,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                                height: 4,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: Colors.white),
-                              ),
-                              Container(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        "Stop1",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 12),
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 15,
-                                      width: 15,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                                height: 4,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: Colors.white),
-                              ),
-                              Container(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        "Stop1",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 12),
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 15,
-                                      width: 15,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                                height: 4,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: Colors.white),
-                              ),
-                              Container(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        "Stop1",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 12),
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 15,
-                                      width: 15,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                            children: generateRoutesUI(Route1),
                           ),
                         ),
                       ),
