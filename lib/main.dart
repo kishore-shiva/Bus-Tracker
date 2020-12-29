@@ -8,6 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:wakelock/wakelock.dart';
+import 'GetAddress.dart';
 
 void main() {
   runApp(MyApp());
@@ -39,14 +40,15 @@ class _MyHomePageState extends State<MyHomePage> {
   final scrollDirection = Axis.horizontal;
   final route1 = [""];
   Color notReached = Colors.red, Reached = Colors.green;
+  GetAddress getGeoAddress = new GetAddress();
 
   List Route1 = [
-    "Perumalpet",
-    "choolai",
-    "Anna nagar",
-    "Guindy",
-    "Adyar",
-    "OMR"
+    "Mookathal Street",
+    "Doctor Nair Road",
+    "Pantheon Road",
+    "College Road",
+    "Haddows Road",
+    "Nungambakkam High Road"
   ];
   final colors = new List();
 
@@ -161,24 +163,19 @@ class _MyHomePageState extends State<MyHomePage> {
         fontSize: 16.0);
     print("FN STARTED _______________________________");
     print("${first.addressLine} : " + Route1[0]);
-    for (int i = 0; i < Route1.length; i++) {
-      if ("${first.addressLine}"
-          .contains(new RegExp(Route1[i], caseSensitive: false))) {
-        print("MATCHED ________________________");
-        print("${first.addressLine} : " + Route1[i]);
-        setState(() {
-          colors[i] = Reached;
-          Fluttertoast.showToast(
-              msg: "done correct but not changing",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.TOP,
-              backgroundColor: Colors.blue,
-              textColor: Colors.white,
-              fontSize: 16.0);
+    List geoAddress;
+    getGeoAddress.get_address(lat, long).then((value) => {
+          for (int i = 0; i < Route1.length; i++)
+            {
+              if (value.contains(Route1[i]))
+                {
+                  setState(() {
+                    colors[i] = Reached;
+                  })
+                }
+            }
         });
-        break;
-      }
-    }
+    print('----------------REQUEST GOT : ' + geoAddress.toString());
   }
 
   void _add(double lat, double lng, BitmapDescriptor icon) {
@@ -217,6 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
     for (int i = 0; i < Route1.length; i++) {
       colors.add(notReached);
     }
+    print("_____________ ON INIT EXECUTES __________________");
   }
 
   Future<String> scroller() async {

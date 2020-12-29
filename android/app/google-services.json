@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "374091301017",
+    "project_id": "bustracker-sjit",
+    "storage_bucket": "bustracker-sjit.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:374091301017:android:ac99013ab8a5df7ae5f808",
+        "android_client_info": {
+          "package_name": "com.example.google_maps"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "374091301017-vpmvmedp5o120vgq56lva7796ipsuket.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPu1fq2DMLa0ZL_56Z9q5zQLkE5W3fw-k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "374091301017-vpmvmedp5o120vgq56lva7796ipsuket.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
