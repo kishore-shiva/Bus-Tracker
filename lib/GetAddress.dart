@@ -10,11 +10,8 @@ class GetAddress {
     int len = placemarks.length;
     addresses = new List(len);
     for (int i = 0; i < len; i++) {
-      print('THIS IS A ' + placemarks[i].thoroughfare + ' ---------------');
       addresses[i] = placemarks[i].thoroughfare;
     }
-    print('ADDRESSES IS --------------' + addresses.toString() + '-----------');
-
     return addresses;
   }
 }

@@ -9,8 +9,13 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:wakelock/wakelock.dart';
 import 'GetAddress.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -41,6 +46,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final route1 = [""];
   Color notReached = Colors.red, Reached = Colors.green;
   GetAddress getGeoAddress = new GetAddress();
+  var loading = true;
+  final _firestore = Firestore.instance;
+  String reachedLocations = "";
 
   List Route1 = [
     "Mookathal Street",
@@ -133,8 +141,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onMapCreated(GoogleMapController _cntlr) {
     _controller = _cntlr;
     Location location = new Location();
-    print('The location is: ');
-    print(location.getLocation());
     _location.onLocationChanged().listen((l) {
       getAddress(l.latitude, l.longitude);
       _controller.animateCamera(
@@ -152,18 +158,17 @@ class _MyHomePageState extends State<MyHomePage> {
     var addresses =
         await Geocoder.local.findAddressesFromCoordinates(coordinates);
     var first = addresses.first;
-    print("${first.featureName} : ${first.addressLine}");
-    Fluttertoast.showToast(
-        msg:
-            "${first.featureName} : ${first.addressLine} : ${first.subLocality}",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
-    print("FN STARTED _______________________________");
-    print("${first.addressLine} : " + Route1[0]);
-    List geoAddress;
+    if (loading == false) {
+      Fluttertoast.showToast(
+          msg:
+              "${first.featureName} : ${first.addressLine} : ${first.subLocality}",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
+    int i = 0;
     getGeoAddress.get_address(lat, long).then((value) => {
           for (int i = 0; i < Route1.length; i++)
             {
@@ -171,11 +176,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 {
                   setState(() {
                     colors[i] = Reached;
-                  })
+                  }),
+                  if (!reachedLocations
+                      .contains(new RegExp(Route1[i], caseSensitive: false)))
+                    {
+                      _firestore
+                          .collection('Bus1 Updates')
+                          .add({'reached': Route1[i]}),
+                      reachedLocations += Route1[i]
+                    }
+                  else
+                    {}
+                  //Update the reached points database for the client app
                 }
             }
         });
-    print('----------------REQUEST GOT : ' + geoAddress.toString());
   }
 
   void _add(double lat, double lng, BitmapDescriptor icon) {
@@ -215,6 +230,33 @@ class _MyHomePageState extends State<MyHomePage> {
       colors.add(notReached);
     }
     print("_____________ ON INIT EXECUTES __________________");
+    Future.delayed(const Duration(milliseconds: 4000), () async {
+      setState(() {
+        loading = false;
+      });
+    });
+
+    // Adding Data to the Firestore database
+    /**_firestore.collection('Bus1').add({
+      'Route1': "Mookathal Street",
+      'Route2': "Doctor Nair Road",
+      'Route3': "Pantheon Road",
+      'Route4': "College Road",
+      'Route5': "Haddows Road",
+      'Route6': "Nungambakkam High Road"
+    });*/
+
+    print('------------FIREBASE ADDED BUS1 ROUTE IS : ---------------');
+    updateRoutes();
+  }
+
+  void updateRoutes() async {
+    final updateRoutes =
+        await _firestore.collection('Bus1 Updates').getDocuments();
+    for (var update in updateRoutes.documents) {
+      reachedLocations += update.data()['reached'];
+      colors[Route1.indexOf(update.data()['reached'])] = Reached;
+    }
   }
 
   Future<String> scroller() async {
@@ -230,46 +272,59 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-        child: Column(
-          children: [
-            Container(
-              height: 0.8 * MediaQuery.of(context).size.height - 80,
-              width: MediaQuery.of(context).size.width,
-              child: GoogleMap(
-                myLocationButtonEnabled: true,
-                initialCameraPosition:
-                    CameraPosition(target: _initialcameraposition),
-                mapType: MapType.normal,
-                onMapCreated: _onMapCreated,
-                myLocationEnabled: true,
-                onCameraMove: null,
-                markers: Set<Marker>.of(markers.values),
+        child: ModalProgressHUD(
+            inAsyncCall: loading,
+            opacity: 0.6,
+            color: Colors.black,
+            progressIndicator: SizedBox(
+              height: 100,
+              width: 100,
+              child: CircularProgressIndicator(
+                valueColor: new AlwaysStoppedAnimation<Color>(Colors.black),
+                backgroundColor: Colors.orange,
+                strokeWidth: 7,
               ),
             ),
-            Container(
-                height: 0.2 * MediaQuery.of(context).size.height - 12,
-                width: MediaQuery.of(context).size.width,
-                color: Colors.black,
-                child: Container(
-                    margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                    child: Scrollbar(
-                      isAlwaysShown: true,
-                      controller: _scrollController,
-                      radius: Radius.circular(50),
-                      thickness: 10,
-                      child: Center(
-                        child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  height: 0.8 * MediaQuery.of(context).size.height - 80,
+                  width: MediaQuery.of(context).size.width,
+                  child: GoogleMap(
+                    myLocationButtonEnabled: true,
+                    initialCameraPosition:
+                        CameraPosition(target: _initialcameraposition),
+                    mapType: MapType.normal,
+                    onMapCreated: _onMapCreated,
+                    myLocationEnabled: true,
+                    onCameraMove: null,
+                    markers: Set<Marker>.of(markers.values),
+                  ),
+                ),
+                Container(
+                    height: 0.2 * MediaQuery.of(context).size.height - 12,
+                    width: MediaQuery.of(context).size.width,
+                    color: Colors.black,
+                    child: Container(
+                        margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                        child: Scrollbar(
+                          isAlwaysShown: true,
                           controller: _scrollController,
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: generateRoutesUI(Route1),
+                          radius: Radius.circular(50),
+                          thickness: 10,
+                          child: Center(
+                            child: SingleChildScrollView(
+                              controller: _scrollController,
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: generateRoutesUI(Route1),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ))),
-          ],
-        ),
+                        ))),
+              ],
+            )),
       ),
     );
   }
