@@ -19,4 +19,4 @@ samples, guidance on mobile development, and a full API reference.
 
 <img src="https://github.com/kishore-shiva/Bus-Tracker/blob/7165fa76dba43bdc27223266bc3ef42d749b0dde/images/Screenshot_2021-03-03-12-57-05-13_1baf35eae6309f0b11a7001af5796006.jpg" height="600" width="300">
 
-![alt text](https://github.com/kishore-shiva/Bus-Tracker/blob/7165fa76dba43bdc27223266bc3ef42d749b0dde/images/ezgif.com-gif-maker.gif)
+<img src="https://github.com/kishore-shiva/Bus-Tracker/blob/7165fa76dba43bdc27223266bc3ef42d749b0dde/images/ezgif.com-gif-maker.gif" height="600" width="300">
